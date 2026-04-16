@@ -1,13 +1,12 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from typing import Tuple
+
 # Intent: Generate synthetic sensor data for lab3 plots
 # Sensor A: mean 25 C, std 3 C, 200 readings.
 # Sensor B: mean 27 C, std 4.5 C, 200 readings.
 # Also generate 200 timestamps uniformly from 0 to 10 seconds.
 # Use np.random.default_rng with a seed = last 4 digits of your Drexel ID.
-
-import numpy as np
-import matplotlib.pyplot as plt
-from typing import Tuple
-
 
 def generate_data(seed: int,
                   n: int = 200,
@@ -68,6 +67,9 @@ def generate_data(seed: int,
 
     return timestamps, sensor_a, sensor_b
 
+# Create plot_scatter(sensor_a, sensor_b, timestamps, ax) that draws
+# the scatter plot from the notebook onto the given Axes object.
+# NumPy-style docstring. Modifies ax in place, returns None.
 
 def plot_scatter(ax,
                  timestamps: np.ndarray,
@@ -157,6 +159,151 @@ if __name__ == '__main__':
     fig.savefig('scatter_demo.png')
     print("Saved 'scatter_demo.png'")
 
-# Create plot_scatter(sensor_a, sensor_b, timestamps, ax) that draws
-# the scatter plot from the notebook onto the given Axes object.
-# NumPy-style docstring. Modifies ax in place, returns None.
+# Overlaid histogram of Sensor A and Sensor B temperature distributions.
+# Use 30 bins, alpha=0.5 for transparency so both distributions are visible.
+# Add vertical dashed lines at each sensor's mean.
+# Include a legend labeling each sensor.
+
+def plot_histogram(ax,
+                   sensor_a: np.ndarray,
+                   sensor_b: np.ndarray,
+                   *,
+                   bins: int = 30,
+                   label_a: str = 'Sensor A',
+                   label_b: str = 'Sensor B',
+                   color_a: str = 'tab:blue',
+                   color_b: str = 'tab:orange',
+                   alpha: float = 0.5,
+                   density: bool = False,
+                   show_means: bool = True,
+                   title: str | None = None) -> None:
+    """Draw overlaid histograms of two sensor distributions on an Axes.
+
+    Parameters
+    ----------
+    ax : matplotlib.axes.Axes
+        Axes to draw the histograms onto (modified in place).
+    sensor_a : numpy.ndarray, shape (n,)
+        Samples for Sensor A (float64).
+    sensor_b : numpy.ndarray, shape (n,)
+        Samples for Sensor B (float64).
+    bins : int, optional
+        Number of histogram bins (default 30).
+    label_a, label_b : str, optional
+        Legend labels for each sensor.
+    color_a, color_b : str, optional
+        Colors for the histogram bars.
+    alpha : float, optional
+        Transparency for histogram bars (default 0.5).
+    density : bool, optional
+        If True, normalize histograms to form a probability density.
+    show_means : bool, optional
+        If True, draw vertical dashed lines at each sensor's mean.
+    title : str or None, optional
+        Axes title. If None a sensible default is used.
+
+    Returns
+    -------
+    None
+        Modifies ``ax`` in place and returns nothing.
+
+    Notes
+    -----
+    - Uses semi-transparent, overlaid histograms so both distributions are visible.
+    - Adds a legend and grid for readability.
+    """
+    sensor_a = np.asarray(sensor_a, dtype=np.float64)
+    sensor_b = np.asarray(sensor_b, dtype=np.float64)
+
+    ax.hist(sensor_a, bins=bins, color=color_a, alpha=alpha, label=label_a, density=density)
+    ax.hist(sensor_b, bins=bins, color=color_b, alpha=alpha, label=label_b, density=density)
+
+    if show_means:
+        ax.axvline(float(sensor_a.mean()), color=color_a, linestyle='--', linewidth=1.25, label=f"{label_a} mean")
+        ax.axvline(float(sensor_b.mean()), color=color_b, linestyle='--', linewidth=1.25, label=f"{label_b} mean")
+
+    ax.set_xlabel('Temperature (°C)')
+    ax.set_ylabel('Count' if not density else 'Density')
+    ax.grid(True, linestyle=':', alpha=0.5)
+    ax.legend()
+    if title is None:
+        title = f'Histogram of {label_a} and {label_b}'
+    ax.set_title(title)
+
+# Side-by-side box plot comparing Sensor A and Sensor B distributions.
+# Label x-axis with sensor names, y-axis with "Temperature (deg C)".
+# Add a horizontal dashed line at the overall mean of both sensors combined.
+
+def plot_boxplot(ax,
+                 sensor_a: np.ndarray,
+                 sensor_b: np.ndarray,
+                 *,
+                 labels: tuple | None = None,
+                 colors: tuple | None = None,
+                 showmeans: bool = False,
+                 boxprops: dict | None = None,
+                 medianprops: dict | None = None,
+                 title: str | None = None) -> None:
+    """Draw a side-by-side boxplot comparing two sensor distributions.
+
+    Parameters
+    ----------
+    ax : matplotlib.axes.Axes
+        Axes to draw the boxplot onto (modified in place).
+    sensor_a : numpy.ndarray, shape (n,)
+        Samples for Sensor A (float64).
+    sensor_b : numpy.ndarray, shape (n,)
+        Samples for Sensor B (float64).
+    labels : tuple of str, optional
+        Labels for the x-axis categories (default ('Sensor A', 'Sensor B')).
+    colors : tuple of str, optional
+        Fill colors for the boxes (default ('tab:blue','tab:orange')).
+    showmeans : bool, optional
+        If True, show the mean marker for each box (default False).
+    boxprops, medianprops : dict, optional
+        Additional properties forwarded to matplotlib's boxplot for boxes/median.
+    title : str or None, optional
+        Axes title. If None a sensible default is used.
+
+    Returns
+    -------
+    None
+        Modifies ``ax`` in place and returns nothing.
+
+    Notes
+    -----
+    - Boxes are colored using ``patch_artist=True`` so fill colors can be set.
+    - Draws a horizontal dashed line at the overall mean of both sensors combined.
+    """
+    sensor_a = np.asarray(sensor_a, dtype=np.float64)
+    sensor_b = np.asarray(sensor_b, dtype=np.float64)
+
+    if labels is None:
+        labels = ('Sensor A', 'Sensor B')
+    if colors is None:
+        colors = ('tab:blue', 'tab:orange')
+
+    bp = ax.boxplot([sensor_a, sensor_b], patch_artist=True, labels=labels, showmeans=showmeans,
+                    boxprops=boxprops or {}, medianprops=medianprops or {})
+
+    # Color the boxes
+    for patch, color in zip(bp.get('boxes', []), colors):
+        patch.set_facecolor(color)
+        patch.set_alpha(0.6)
+
+    # Style median lines if available
+    if 'medians' in bp:
+        for med in bp['medians']:
+            med.set(color='black', linewidth=1.0)
+
+    overall_mean = float(np.concatenate([sensor_a, sensor_b]).mean())
+    ax.axhline(overall_mean, color='gray', linestyle='--', linewidth=1.0, label=f'Overall mean ({overall_mean:.2f}°C)')
+
+    ax.set_ylabel('Temperature (°C)')
+    ax.grid(True, axis='y', linestyle=':', alpha=0.5)
+    ax.legend()
+    if title is None:
+        title = 'Boxplot comparison'
+    ax.set_title(title)
+
+

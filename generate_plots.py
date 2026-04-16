@@ -327,17 +327,19 @@ def main(seed: int = 3693) -> None:
     """
     ts, a, b = generate_data(seed=seed)
 
-    # Create a single 1x3 figure
-    fig, axs = plt.subplots(1, 3, figsize=(15, 4))
-
+    # Arrange plots in a 2x2 subplot grid
+    fig, axs = plt.subplots(2, 2, figsize=(10, 10))
+    
     # Left: time-series scatter for both sensors
-    plot_scatter(axs[0], ts, a, b, title='Time vs Temperature')
-
+    plot_scatter(axs[0, 0], ts, a, b, title='Time vs Temperature')
+    
     # Middle: histogram
-    plot_histogram(axs[1], a, b, title='Histogram of temperatures')
+    plot_histogram(axs[0, 1], a, b, title='Histogram of temperatures')
 
     # Right: boxplot
-    plot_boxplot(axs[2], a, b, title='Boxplot comparison')
+    plot_boxplot(axs[1, 0], a, b, title='Boxplot comparison')
+
+    # Note: axs[1, 1] remains empty as per lab instructions.
 
     fig.tight_layout()
     out_fname = 'sensor_analysis.png'

@@ -5,6 +5,7 @@
 # Use np.random.default_rng with a seed = last 4 digits of your Drexel ID.
 
 import numpy as np
+import matplotlib.pyplot as plt
 from typing import Tuple
 
 
@@ -68,8 +69,94 @@ def generate_data(seed: int,
     return timestamps, sensor_a, sensor_b
 
 
+def plot_scatter(ax,
+                 timestamps: np.ndarray,
+                 sensor_a: np.ndarray,
+                 sensor_b: np.ndarray,
+                 *,
+                 label_a: str = 'Sensor A',
+                 label_b: str = 'Sensor B',
+                 color_a: str = 'tab:blue',
+                 color_b: str = 'tab:orange',
+                 markersize: float = 30.0,
+                 alpha: float = 0.7,
+                 title: str | None = None) -> None:
+    """Plot scatter time-series of two sensors on an existing Axes.
+
+    Parameters
+    ----------
+    ax : matplotlib.axes.Axes
+        The Axes object to plot onto. Modified in place.
+    timestamps : numpy.ndarray, shape (n,)
+        Time values in seconds (float64).
+    sensor_a : numpy.ndarray, shape (n,)
+        Temperature readings for Sensor A (float64).
+    sensor_b : numpy.ndarray, shape (n,)
+        Temperature readings for Sensor B (float64).
+    label_a : str, optional
+        Legend label for Sensor A. Default 'Sensor A'.
+    label_b : str, optional
+        Legend label for Sensor B. Default 'Sensor B'.
+    color_a : str, optional
+        Color for Sensor A markers. Default 'tab:blue'.
+    color_b : str, optional
+        Color for Sensor B markers. Default 'tab:orange'.
+    markersize : float, optional
+        Marker size for scatter points. Default 30.0.
+    alpha : float, optional
+        Marker alpha (transparency). Default 0.7.
+    title : str or None, optional
+        Axes title. If None a sensible default is used.
+
+    Returns
+    -------
+    None
+        The function modifies ``ax`` in place and returns nothing.
+
+    Notes
+    -----
+    - Computes and annotates the Pearson correlation coefficient between
+      the two sensor readings (across the provided samples) in the title.
+    - Does not create a new figure; caller is responsible for figure management.
+    """
+    # Basic input validation / normalization
+    timestamps = np.asarray(timestamps, dtype=np.float64)
+    sensor_a = np.asarray(sensor_a, dtype=np.float64)
+    sensor_b = np.asarray(sensor_b, dtype=np.float64)
+
+    # Scatter plots for both sensors vs time
+    ax.scatter(timestamps, sensor_a, s=markersize, c=color_a, alpha=alpha, label=label_a, edgecolors='w', linewidths=0.3)
+    ax.scatter(timestamps, sensor_b, s=markersize, c=color_b, alpha=alpha, label=label_b, edgecolors='w', linewidths=0.3)
+
+    ax.set_xlabel('Time (s)')
+    ax.set_ylabel('Temperature (°C)')
+    ax.grid(True, linestyle=':', alpha=0.6)
+    ax.legend()
+
+    # Compute Pearson correlation coefficient for annotation
+    try:
+        r = np.corrcoef(sensor_a, sensor_b)[0, 1]
+    except Exception:
+        r = np.nan
+
+    if title is None:
+        title = f'Time-series scatter (r = {r:.2f})' if np.isfinite(r) else 'Time-series scatter'
+    ax.set_title(title)
+
+
 if __name__ == '__main__':
     # Simple sanity check
     ts, a, b = generate_data(seed=3693)
     print('shapes:', ts.shape, a.shape, b.shape)
     print('means:', float(a.mean()), float(b.mean()))
+
+    # Demonstrate plotting function by creating and saving a figure
+    fig, ax = plt.subplots(figsize=(8, 4))
+    plot_scatter(ax, ts, a, b)
+    fig.tight_layout()
+    fig.savefig('scatter_demo.png')
+    print("Saved 'scatter_demo.png'")
+
+# Create plot_scatter(sensor_a, sensor_b, timestamps, ax) that draws
+# the scatter plot from the notebook onto the given Axes object.
+# NumPy-style docstring. Modifies ax in place, returns None.

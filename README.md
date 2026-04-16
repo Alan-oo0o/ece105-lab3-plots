@@ -37,4 +37,4 @@ Running the script produces a single PNG file named `sensor_analysis.png` contai
 
 ## AI tools used and disclosure
 
-I used GitHub Copilot to assist with this lab. I followed the explain first pattern and context scoping techniques. I used intent comments for each function to specify requirements prior to allowing Copilot to suggest implemnetations to ensure code generated adhered to specific requirements. 
+I used GitHub Copilot to assist with this lab. I followed the explain first pattern and context scoping techniques. I used intent comments for each function to specify requirements prior to allowing Copilot to suggest implementations to ensure code generated adhered to specific requirements. 

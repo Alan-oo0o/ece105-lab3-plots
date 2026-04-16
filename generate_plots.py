@@ -2,6 +2,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 from typing import Tuple
 
+"""
+Module for generating synthetic sensor data and visualizing it through 
+scatter plots, histograms, and boxplots.
+"""
+
 # Intent: Generate synthetic sensor data for lab3 plots
 # Sensor A: mean 25 C, std 3 C, 200 readings.
 # Sensor B: mean 27 C, std 4.5 C, 200 readings.
@@ -144,20 +149,6 @@ def plot_scatter(ax,
     if title is None:
         title = f'Time-series scatter (r = {r:.2f})' if np.isfinite(r) else 'Time-series scatter'
     ax.set_title(title)
-
-
-if __name__ == '__main__':
-    # Simple sanity check
-    ts, a, b = generate_data(seed=3693)
-    print('shapes:', ts.shape, a.shape, b.shape)
-    print('means:', float(a.mean()), float(b.mean()))
-
-    # Demonstrate plotting function by creating and saving a figure
-    fig, ax = plt.subplots(figsize=(8, 4))
-    plot_scatter(ax, ts, a, b)
-    fig.tight_layout()
-    fig.savefig('scatter_demo.png')
-    print("Saved 'scatter_demo.png'")
 
 # Overlaid histogram of Sensor A and Sensor B temperature distributions.
 # Use 30 bins, alpha=0.5 for transparency so both distributions are visible.
@@ -306,4 +297,56 @@ def plot_boxplot(ax,
         title = 'Boxplot comparison'
     ax.set_title(title)
 
+
+# Create main() that generates data, creates a 1x3 subplot figure,
+# calls each plot function, adjusts layout, and saves as sensor_analysis.png
+# at 150 DPI with tight bounding box.
+
+def main(seed: int = 3693) -> None:
+    """Generate data and produce a consolidated 1x3 multi-panel figure.
+
+    Parameters
+    ----------
+    seed : int
+        Random seed passed to :func:`generate_data` for reproducibility. Default is 3693.
+
+    Returns
+    -------
+    None
+        Creates and saves a single PNG file in the current working directory:
+        - 'sensor_analysis.png' : 1x3 figure with Time vs Temperature (left),
+          overlaid histogram (middle), and boxplot comparison (right).
+
+    Notes
+    -----
+    - Uses the helper plotting functions in this module (plot_scatter,
+      plot_histogram, plot_boxplot) which modify Axes in place.
+    - The function closes the figure after saving to avoid consuming memory.
+    - The scatter panel shows only Time vs Temperature for both sensors; the
+      redundant A vs B panel and correlation calculation were removed.
+    """
+    ts, a, b = generate_data(seed=seed)
+
+    # Create a single 1x3 figure
+    fig, axs = plt.subplots(1, 3, figsize=(15, 4))
+
+    # Left: time-series scatter for both sensors
+    plot_scatter(axs[0], ts, a, b, title='Time vs Temperature')
+
+    # Middle: histogram
+    plot_histogram(axs[1], a, b, title='Histogram of temperatures')
+
+    # Right: boxplot
+    plot_boxplot(axs[2], a, b, title='Boxplot comparison')
+
+    fig.tight_layout()
+    out_fname = 'sensor_analysis.png'
+    fig.savefig(out_fname, dpi=150, bbox_inches='tight')
+    plt.close(fig)
+
+    print(f"Saved: {out_fname}")
+
+
+if __name__ == '__main__':
+    main()
 

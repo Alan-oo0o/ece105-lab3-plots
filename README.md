@@ -28,11 +28,12 @@ You can adjust the RNG seed by editing the default in the script or by calling t
 
 ## Example output
 
-Running the script produces a single PNG file named `sensor_analysis.png` containing a 1x3 figure with:
+Running the script produces a single PNG file named `sensor_analysis.png` containing a **2x2 figure** with:
 
-- Left: Time vs Temperature scatter plot for Sensor A and Sensor B
-- Middle: Overlaid histogram comparing the temperature distributions
-- Right: Side-by-side boxplot comparison with overall mean indicated
+- Top-Left: Time vs Temperature scatter plot for Sensor A and Sensor B
+- Top-Right: Overlaid histogram comparing the temperature distributions
+- Bottom-Left: Side-by-side boxplot comparison with overall mean indicated
+- Bottom-Right: Empty / placeholder for summary statistics
 
 ## AI tools used and disclosure
 
